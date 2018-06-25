@@ -36,34 +36,71 @@ const events = [
        start: "2018-06-29T06:30:00",
        end: "2018-06-29T12:30:00",
         gps: "40.7128° N, 73.0060° W"},
+        {title: "July",
+        start: "2018-07-02T06:30:00",
+        end: "2018-07-03T12:30:00",
+         gps: "40.7128° N, 73.0060° W"},
 ];
 
 class EventList extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      events: events // you can do something like initialData.slice(0, 10) to populate from initialData.
-
+      events: events, // you can do something like initialData.slice(0, 10) to populate from initialData.
+      view: 'listWeek'
     };
-    console.log(this.state)
+    this._updateView = this._updateView.bind(this)
   }
 
+
+
   componentDidMount() {
-    $('#calendar').fullCalendar({
-      eventSources: [
-        {
-          events: this.state.events
-        }
-      ]
-    // put your options and callbacks here
-  })
+    this._reloadCalendar()
+
+  }
+
+  _reloadCalendar() {
+  $('#calendar').fullCalendar({
+    defaultView: this.state.view,
+    eventSources: [
+      {
+        events: this.state.events
+      }
+    ],
+    eventClick: function(eventObj) {
+
+        alert(eventObj.title + '.\n' +
+              'Start Time:' + eventObj.start.format('h:mm') + '.\n' +
+              'End Time:' + eventObj.end.format('h:mm') + '.\n' +
+            `Google Maps link: http://maps.google.com/maps?query${eventObj.gps}`
+            );
+
+    }
+  // put your options and callbacks here
+}) }
+
+  _updateView(e) {
+    e.preventDefault()
+    console.log(e)
+    if (this.state.view == "month") {
+      this.setState({view: "listWeek"})
+      $('#calendar').fullCalendar('changeView', 'listWeek');
+    } else {
+      this.setState({view: "month"})
+      $('#calendar').fullCalendar('changeView', 'month');
+    }
   }
   render() {
 
 
     return (
-
-      <div id='calendar'></div>
+      <div className="calendar-container">
+        <div className="calendar-header">
+          <h2> My Calendar </h2>
+          <a href="" name={this.state.view == "month"? "listWeek" : "month"} onClick={this._updateView}> Switch to {this.state.view == "month"? "list" : "month"} view </a>
+        </div>
+        <div id='calendar'></div>
+      </div>
 
 
 
