@@ -1,35 +1,40 @@
 import React from 'react';
 import './App.css';
+import $ from 'jquery';
+import 'fullcalendar';
+var moment = require('moment');
+
 
 const events = [
-  {name: "Meeting with Sam",
-   event_start: new Date(2018, 10, 26, 8, 0, 0),
-   event_end: new Date(2018, 10, 26, 8, 30, 0),
-   gps: "40.7128° N, 73.060° W"},
+  {title: "Meeting with Sam",
+   start: "2018-06-26T06:30:00",
+   end: "2018-06-26T12:30:00",
+   gps: "40.7128° N, 73.060° W"
+  },
 
-   {name: "Meeting with Jennifer",
-    event_start: new Date(2018, 10, 27, 8, 0, 0),
-    event_end: new Date(2018, 10, 27, 8, 30, 0),
-    gps: "40.7128° N, 73.060° W"},
+   {title: "Meeting with Jennifer",
+   start: "2018-06-26T06:30:00",
+   end: "2018-06-26T12:30:00",
+    gps: "40.7328° N, 73.080° W"},
 
-    {name: "Meeting with Jose",
-     event_start: new Date(2018, 10, 25, 8, 0, 0),
-     event_end: new Date(2018, 10, 25, 8, 30, 0),
-     gps: "40.7128° N, 73.060° W"},
+    {title: "Meeting with Jose",
+    start: "2018-06-27T06:30:00",
+    end: "2018-06-28T12:30:00",
+     gps: "40.9128° N, 73.90° W"},
 
-     {name: "Fun",
-      event_start: new Date(2018, 10, 26, 5, 0, 0),
-      event_end: new Date(2018, 10, 26, 5, 30, 0),
-      gps: "40.7128° N, 73.060° W"},
+     {title: "Fun",
+     start: "2018-06-27T08:30:00",
+     end: "2018-06-26T13:30:00",
+      gps: "40.3128° N, 73.460° W"},
 
-      {name: "X",
-       event_start: new Date(2018, 10, 27, 5, 0, 0),
-       event_end: new Date(2018, 10, 27, 5, 30, 0),
-       gps: "40.7128° N, 73.060° W"},
+      {title: "X",
+      start: "2018-06-28T06:30:00",
+      end: "2018-06-28T12:30:00",
+       gps: "40.3128° N, 75.060° W"},
 
-       {name: "Y",
-        event_start: new Date(2018, 11, 2, 8, 0, 0),
-        event_end: new Date(2018, 11, 1, 8, 30, 0),
+       {title: "Y",
+       start: "2018-06-29T06:30:00",
+       end: "2018-06-29T12:30:00",
         gps: "40.7128° N, 73.0060° W"},
 ];
 
@@ -42,13 +47,26 @@ class EventList extends React.Component {
     };
     console.log(this.state)
   }
+
+  componentDidMount() {
+    $('#calendar').fullCalendar({
+      eventSources: [
+        {
+          events: this.state.events
+        }
+      ]
+    // put your options and callbacks here
+  })
+  }
   render() {
 
 
     return (
-      this.state.events.map((event) =>
-      <li>{event.name}</li>
-    )
+
+      <div id='calendar'></div>
+
+
+
 
     );
 }
