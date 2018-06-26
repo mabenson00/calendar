@@ -1,9 +1,25 @@
 import React from 'react';
 import './App.css';
-import $ from 'jquery';
 import 'fullcalendar';
+import $ from 'jquery'
+import ReactDOM from 'react-dom';
+import Modal from 'react-modal';
+
+
+
 var moment = require('moment');
 
+
+const customStyles = {
+  content : {
+    top                   : '100px',
+    left                  : '50%',
+    right                 : 'auto',
+    bottom                : 'auto',
+    marginRight           : '-50%',
+    transform             : 'translate(-50%, -50%)'
+  }
+};
 
 const events = [
   {title: "Meeting with Sam",
@@ -41,25 +57,91 @@ const events = [
         end: "2018-07-03T12:30:00",
          gps: "40.7128° N, 73.0060° W"},
 ];
+Modal.setAppElement('#root');
 
 class EventList extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
       events: events, // you can do something like initialData.slice(0, 10) to populate from initialData.
-      view: 'listWeek'
+      view: 'month',
+      showAddEvent: false,
+      modalIsOpen: false,
+      date: 0,
+      end: '',
+      start: '',
+      title: ''
     };
     this._updateView = this._updateView.bind(this)
+    this._toggleAddEvent = this._toggleAddEvent.bind(this)
+    this._newEvent = this._newEvent.bind(this);
+    this.afterOpenModal = this.afterOpenModal.bind(this);
+    this.closeModal = this.closeModal.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.saveEvent = this.saveEvent.bind(this)
   }
 
 
 
   componentDidMount() {
-    this._reloadCalendar()
+    this._loadCalendar()
 
   }
 
-  _reloadCalendar() {
+  handleChange (evt) {
+
+   this.setState({ [evt.target.name]: evt.target.value });
+ }
+
+
+  afterOpenModal() {
+
+     // references are now sync'd and can be accessed.
+   }
+
+  closeModal() {
+     this.setState({modalIsOpen: false});
+   }
+
+  _toggleAddEvent(e) {
+    if (!this.state.showAddEvent) {
+      $(e.target).css("display", "none")
+      this.setState({showAddEvent: true})
+    }
+
+  }
+
+  _newEvent(date, jsEvent, view) {
+    this.setState({modalIsOpen: true});
+    this.setState({date: date.toISOString()})
+
+  }
+
+  handleSubmit(event) {
+      let start = this.state.start
+      let end = this.state.end
+      let day = this.state.date
+      start = day+"T"+this.state.start+":00"
+      end = day+"T"+this.state.end+":00"
+      let title = this.state.title
+      let newEvent = {start: start, end: end, title: title}
+      if (end > start ){
+        this.saveEvent(newEvent)
+      } else {
+
+      }
+
+      event.preventDefault();
+    }
+
+  saveEvent(event) {
+    this.setState({events: [...this.state.events, event]})
+    $('#calendar').fullCalendar( 'renderEvent', event, true )
+
+  }
+
+  _loadCalendar() {
   $('#calendar').fullCalendar({
     defaultView: this.state.view,
     eventSources: [
@@ -68,20 +150,33 @@ class EventList extends React.Component {
       }
     ],
     eventClick: function(eventObj) {
+      alert(eventObj.title + '.\n' +
+            'Start Time:' + eventObj.start.format('h:mm') + '.\n' +
+            'End Time:' + eventObj.end.format('h:mm') + '.\n' +
+          `Google Maps link: http://maps.google.com/maps?query${eventObj.gps}`
+          );
 
-        alert(eventObj.title + '.\n' +
-              'Start Time:' + eventObj.start.format('h:mm') + '.\n' +
-              'End Time:' + eventObj.end.format('h:mm') + '.\n' +
-            `Google Maps link: http://maps.google.com/maps?query${eventObj.gps}`
-            );
+    },
 
-    }
+    dayClick: this._newEvent
   // put your options and callbacks here
 }) }
 
+
+  _addEvent() {
+    if (this.state.showAddEvent) {
+      return (
+        <div id="event-container" className="add-event-container">
+          <form name="EventForm">
+            <input type="text" placeholder="title" name="title"/>
+          </form>
+        </div>
+      )
+    }
+  }
+
   _updateView(e) {
     e.preventDefault()
-    console.log(e)
     if (this.state.view == "month") {
       this.setState({view: "listWeek"})
       $('#calendar').fullCalendar('changeView', 'listWeek');
@@ -90,16 +185,44 @@ class EventList extends React.Component {
       $('#calendar').fullCalendar('changeView', 'month');
     }
   }
+
+
+
+
+
   render() {
 
 
     return (
       <div className="calendar-container">
+
         <div className="calendar-header">
           <h2> My Calendar </h2>
-          <a href="" name={this.state.view == "month"? "listWeek" : "month"} onClick={this._updateView}> Switch to {this.state.view == "month"? "list" : "month"} view </a>
+          <button onClick={this._toggleAddEvent}> Add Event </button>
         </div>
-        <div id='calendar'></div>
+        {this._addEvent()}
+        <div className="options">
+          <button onClick={this._updateView}> Switch to {this.state.view == "month"? "list" : "month"} view </button>
+        </div>
+        <div id='calendar'> </div>
+        <Modal
+         isOpen={this.state.modalIsOpen}
+         onAfterOpen={this.afterOpenModal}
+         onRequestClose={this.closeModal}
+         style={customStyles}
+         contentLabel="Example Modal">
+          <div className="modal-container">
+            <div className="add-event-container">
+              <h4> Add Event for {this.state.date} </h4>
+              <form name="EventForm"  onSubmit={this.handleSubmit}>
+                Title<input type="text" onChange={this.handleChange} placeholder="Meeting with..." name="title"/>
+                Start Time<input type="text" onChange={this.handleChange} name="start" placeholder="HH:MM (24 hours)" />
+                End Time<input type="text" onChange={this.handleChange} name="end" placeholder="HH:MM (24 hours)" />
+                <input type="submit" value="Submit" />
+              </form>
+            </div>
+          </div>
+       </Modal>
       </div>
 
 
