@@ -12,7 +12,7 @@ var moment = require('moment');
 
 const customStyles = {
   content : {
-    top                   : '100px',
+    top                   : '400px',
     left                  : '50%',
     right                 : 'auto',
     bottom                : 'auto',
@@ -126,10 +126,11 @@ class EventList extends React.Component {
       end = day+"T"+this.state.end+":00"
       let title = this.state.title
       let newEvent = {start: start, end: end, title: title}
-      if (end > start ){
+      if (Date.parse(end) > Date.parse(start) ){
         this.saveEvent(newEvent)
+        this.closeModal()
       } else {
-
+        $('#event-container').append("<p>End Time must be later than start time</p>")
       }
 
       event.preventDefault();
@@ -166,7 +167,7 @@ class EventList extends React.Component {
   _addEvent() {
     if (this.state.showAddEvent) {
       return (
-        <div id="event-container" className="add-event-container">
+        <div className="add-event-container">
           <form name="EventForm">
             <input type="text" placeholder="title" name="title"/>
           </form>
@@ -212,7 +213,7 @@ class EventList extends React.Component {
          style={customStyles}
          contentLabel="Example Modal">
           <div className="modal-container">
-            <div className="add-event-container">
+            <div id ="event-container" className="add-event-container">
               <h4> Add Event for {this.state.date} </h4>
               <form name="EventForm"  onSubmit={this.handleSubmit}>
                 Title<input type="text" onChange={this.handleChange} placeholder="Meeting with..." name="title"/>
